@@ -1,82 +1,57 @@
 import os
+import json
 from flask import Flask, redirect, request, session, jsonify
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import google.oauth2.credentials
-import json
-from flask_session import Session  # Untuk menyimpan session agar tidak hilang setelah restart
+from flask_session import Session
 
-# 🔧 Mengizinkan OAuth berjalan di HTTP (untuk testing lokal)
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+# Ambil credential dari environment variable
+GOOGLE_CREDENTIALS = json.loads(os.environ["GOOGLE_CREDENTIALS"])
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
-
-# 🛠️ Konfigurasi Flask-Session agar sesi tetap ada setelah restart
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-CLIENT_SECRETS_FILE = "client_secrets.json"
 SCOPES = ["https://www.googleapis.com/auth/youtube.force-ssl"]
 API_SERVICE_NAME = "youtube"
 API_VERSION = "v3"
 
-@app.route("/")
-def index():
-    return "YouTube Comment Cleaner API Running!"
-
-# 1️⃣ Login ke YouTube API menggunakan OAuth
 @app.route("/login")
 def login():
     try:
-        flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-            CLIENT_SECRETS_FILE, scopes=SCOPES
+        flow = google_auth_oauthlib.flow.Flow.from_client_config(
+            GOOGLE_CREDENTIALS, scopes=SCOPES
         )
-        flow.redirect_uri = "http://127.0.0.1:5001/callback"
-        
-        # Debugging: Cetak redirect URI yang digunakan
-        print(f"Redirect URI: {flow.redirect_uri}")
-
+        flow.redirect_uri = "https://hapuskomenjudol.onrender.com/callback"
         authorization_url, state = flow.authorization_url(
             access_type="offline", include_granted_scopes="true"
         )
         session["state"] = state
-
-        print(f"Authorization URL: {authorization_url}")  # Debugging
         return redirect(authorization_url)
-    
+
     except Exception as e:
-        print(f"Error in login: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-
-# 2️⃣ Callback setelah login berhasil
 @app.route("/callback")
 def callback():
     try:
-        if "state" not in session:
-            return jsonify({"error": "State is missing from session"}), 400
-        
-        flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-            CLIENT_SECRETS_FILE, scopes=SCOPES, state=session.get("state")
+        flow = google_auth_oauthlib.flow.Flow.from_client_config(
+            GOOGLE_CREDENTIALS, scopes=SCOPES, state=session.get("state")
         )
-        flow.redirect_uri = "http://127.0.0.1:5001/callback"  # Ubah ke port 5001
-
-        # Debugging: Cetak request URL untuk melihat masalahnya
-        print("Authorization response:", request.url)
-
-        # Ambil token dari Google
+        flow.redirect_uri = "https://hapuskomenjudol.onrender.com/callback"
         flow.fetch_token(authorization_response=request.url)
-
-        # Simpan token ke session
         credentials = flow.credentials
         session["credentials"] = json.loads(credentials.to_json())
-
         return jsonify({"message": "Login successful! Now you can fetch comments."})
-    
+
     except Exception as e:
-        print(f"Error in callback: {str(e)}")  # Debugging
         return jsonify({"error": str(e)}), 500
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 # 3️⃣ API untuk mendapatkan komentar berdasarkan video_id
 @app.route("/get_comments", methods=["POST"])
