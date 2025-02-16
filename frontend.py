@@ -1,8 +1,8 @@
 import streamlit as st
 import requests
 
-# Backend URL (gunakan port 5001 agar sesuai dengan backend Flask)
-BACKEND_URL = "http://127.0.0.1:5001"
+# Gunakan URL Railway sebagai backend
+BACKEND_URL = "https://youtubekomenjudol-production.up.railway.app"  # Ganti dengan URL Railway Anda
 
 st.title("🛡️ YouTube Comment Cleaner")
 

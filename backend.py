@@ -28,7 +28,7 @@ def login():
         flow = google_auth_oauthlib.flow.Flow.from_client_config(
             GOOGLE_CREDENTIALS, scopes=SCOPES
         )
-        flow.redirect_uri = "https://hapuskomenjudol.up.railway.app/callback"
+        flow.redirect_uri = os.environ.get("BACKEND_URL") + "/callback"
         authorization_url, state = flow.authorization_url(
             access_type="offline", include_granted_scopes="true"
         )
@@ -44,7 +44,7 @@ def callback():
         flow = google_auth_oauthlib.flow.Flow.from_client_config(
             GOOGLE_CREDENTIALS, scopes=SCOPES, state=session.get("state")
         )
-        flow.redirect_uri = "https://hapuskomenjudol.up.railway.app/callback"
+        flow.redirect_uri = os.environ.get("BACKEND_URL") + "/callback"
         flow.fetch_token(authorization_response=request.url)
         credentials = flow.credentials
         session["credentials"] = json.loads(credentials.to_json())
@@ -107,5 +107,5 @@ def delete_comment():
     return jsonify({"message": "Comment deleted successfully"})
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5000))  # Ambil PORT dari Railway atau default ke 5000
     app.run(host="0.0.0.0", port=port, debug=True)
