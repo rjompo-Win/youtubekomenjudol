@@ -6,6 +6,9 @@ import googleapiclient.discovery
 import google.oauth2.credentials
 from flask_session import Session
 
+# Paksa OAuth untuk menerima HTTP (hanya untuk testing)
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+
 # Ambil credential dari environment variable
 GOOGLE_CREDENTIALS = json.loads(os.environ["GOOGLE_CREDENTIALS"])
 
