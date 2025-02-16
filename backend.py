@@ -112,5 +112,6 @@ def delete_comment():
     return jsonify({"message": "Comment deleted successfully"})
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Ambil PORT dari Railway atau default ke 5000
+    port = int(os.environ.get("PORT", 8080))  # Railway default 8080
     app.run(host="0.0.0.0", port=port, debug=True)
+
