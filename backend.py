@@ -6,7 +6,7 @@ import googleapiclient.discovery
 import google.oauth2.credentials
 from flask_session import Session
 
-# Paksa OAuth untuk menerima HTTP (hanya untuk testing)
+# Paksa OAuth untuk menerima HTTP jika belum HTTPS
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 # Ambil credential dari environment variable
@@ -21,8 +21,8 @@ SCOPES = ["https://www.googleapis.com/auth/youtube.force-ssl"]
 API_SERVICE_NAME = "youtube"
 API_VERSION = "v3"
 
-# Redirect backend ke frontend Streamlit Cloud
-FRONTEND_URL = "https://hapuskomenjudol.streamlit.app/"
+# Redirect backend ke frontend Streamlit
+FRONTEND_URL = "https://hapuskomenjudol.streamlit.app"
 
 @app.route("/")
 def index():
@@ -31,12 +31,10 @@ def index():
 @app.route("/login")
 def login():
     try:
+        backend_url = os.environ.get("BACKEND_URL", "https://youtubekomenjudol-production.up.railway.app")
         flow = google_auth_oauthlib.flow.Flow.from_client_config(
             GOOGLE_CREDENTIALS, scopes=SCOPES
         )
-        
-        # Pastikan BACKEND_URL tidak None
-        backend_url = os.environ.get("BACKEND_URL", "https://youtubekomenjudol-production.up.railway.app")
         flow.redirect_uri = backend_url + "/callback"
         
         authorization_url, state = flow.authorization_url(
@@ -48,16 +46,16 @@ def login():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 @app.route("/callback")
 def callback():
     try:
+        backend_url = os.environ.get("BACKEND_URL", "https://youtubekomenjudol-production.up.railway.app")
         flow = google_auth_oauthlib.flow.Flow.from_client_config(
             GOOGLE_CREDENTIALS, scopes=SCOPES, state=session.get("state")
         )
-        backend_url = os.environ.get("BACKEND_URL", "https://youtubekomenjudol-production.up.railway.app")
         flow.redirect_uri = backend_url + "/callback"
         flow.fetch_token(authorization_response=request.url)
+        
         credentials = flow.credentials
         session["credentials"] = json.loads(credentials.to_json())
         return jsonify({"message": "Login successful! Now you can fetch comments."})
