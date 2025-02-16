@@ -18,13 +18,17 @@ SCOPES = ["https://www.googleapis.com/auth/youtube.force-ssl"]
 API_SERVICE_NAME = "youtube"
 API_VERSION = "v3"
 
+@app.route("/")
+def index():
+    return "YouTube Comment Cleaner API Running!"
+
 @app.route("/login")
 def login():
     try:
         flow = google_auth_oauthlib.flow.Flow.from_client_config(
             GOOGLE_CREDENTIALS, scopes=SCOPES
         )
-        flow.redirect_uri = "https://hapuskomenjudol.onrender.com/callback"
+        flow.redirect_uri = "https://hapuskomenjudol.up.railway.app/callback"
         authorization_url, state = flow.authorization_url(
             access_type="offline", include_granted_scopes="true"
         )
@@ -40,7 +44,7 @@ def callback():
         flow = google_auth_oauthlib.flow.Flow.from_client_config(
             GOOGLE_CREDENTIALS, scopes=SCOPES, state=session.get("state")
         )
-        flow.redirect_uri = "https://hapuskomenjudol.onrender.com/callback"
+        flow.redirect_uri = "https://hapuskomenjudol.up.railway.app/callback"
         flow.fetch_token(authorization_response=request.url)
         credentials = flow.credentials
         session["credentials"] = json.loads(credentials.to_json())
@@ -49,13 +53,6 @@ def callback():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Gunakan PORT dari Render atau default 5000
-    app.run(host="0.0.0.0", port=port, debug=True)
-
-
-
-# 3️⃣ API untuk mendapatkan komentar berdasarkan video_id
 @app.route("/get_comments", methods=["POST"])
 def get_comments():
     if "credentials" not in session:
@@ -91,7 +88,6 @@ def get_comments():
 
     return jsonify({"comments": comments})
 
-# 4️⃣ API untuk menghapus komentar berdasarkan comment_id
 @app.route("/delete_comment", methods=["POST"])
 def delete_comment():
     if "credentials" not in session:
@@ -111,4 +107,5 @@ def delete_comment():
     return jsonify({"message": "Comment deleted successfully"})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True)  # Menggunakan port 5001 untuk menghindari konflik
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
