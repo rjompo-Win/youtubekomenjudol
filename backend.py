@@ -121,6 +121,14 @@ def delete_comment():
 
     return jsonify({"message": "Comment deleted successfully"})
 
+@app.route("/get_status")
+def get_status():
+    if "credentials" in session:
+        return jsonify({"logged_in": True})
+    else:
+        return jsonify({"logged_in": False})
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))  # Railway default port
     app.run(host="0.0.0.0", port=port, debug=True)
