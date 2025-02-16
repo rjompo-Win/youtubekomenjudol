@@ -9,7 +9,14 @@ st.title("🛡️ YouTube Comment Cleaner")
 
 # 1️⃣ Login ke YouTube
 st.subheader("1️⃣ Login ke YouTube")
-st.markdown(f"[🔑 Klik di sini untuk Login YouTube]({BACKEND_URL}/login)", unsafe_allow_html=True)
+
+if "login_status" not in st.session_state:
+    st.session_state["login_status"] = False
+
+if not st.session_state["login_status"]:
+    if st.button("🔑 Login ke YouTube"):
+        webbrowser.open(f"{BACKEND_URL}/login")
+        st.session_state["login_status"] = True
 
 # 2️⃣ Input untuk Video ID dan Kata Kunci
 st.subheader("2️⃣ Masukkan Link Video YouTube & Kata Kunci Filter")

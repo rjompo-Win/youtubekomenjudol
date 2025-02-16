@@ -41,10 +41,12 @@ def login():
             access_type="offline", include_granted_scopes="true"
         )
         session["state"] = state
+        session.modified = True  # Pastikan session tidak hilang
         return redirect(authorization_url)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route("/callback")
 def callback():
