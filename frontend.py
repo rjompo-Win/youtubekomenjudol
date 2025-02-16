@@ -1,6 +1,8 @@
 import streamlit as st
 import requests
 import webbrowser
+import json
+
 
 # Gunakan URL Railway sebagai backend
 BACKEND_URL = "https://youtubekomenjudol-production.up.railway.app"
@@ -8,7 +10,18 @@ BACKEND_URL = "https://youtubekomenjudol-production.up.railway.app"
 st.title("🛡️ YouTube Comment Cleaner")
 
 # Cek apakah user sudah login
-status_response = requests.get(f"{BACKEND_URL}/get_status").json()
+try:
+    response = requests.get(f"{BACKEND_URL}/get_status")
+    response.raise_for_status()  # Cek jika error HTTP
+    st.write(f"🔍 Debug: Response dari backend = {response.text}")  # Debugging
+    status_response = response.json()  # Convert ke JSON
+except requests.exceptions.RequestException as e:
+    st.error(f"❌ Gagal menghubungi backend: {e}")
+    st.stop()
+except json.decoder.JSONDecodeError:
+    st.error(f"❌ Backend tidak mengembalikan JSON yang valid: {response.text}")
+    st.stop()
+
 is_logged_in = status_response.get("logged_in", False)
 
 if not is_logged_in:
