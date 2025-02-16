@@ -52,7 +52,8 @@ def callback():
         flow = google_auth_oauthlib.flow.Flow.from_client_config(
             GOOGLE_CREDENTIALS, scopes=SCOPES, state=session.get("state")
         )
-        flow.redirect_uri = os.environ.get("BACKEND_URL") + "/callback"
+        backend_url = os.environ.get("BACKEND_URL", "https://youtubekomenjudol-production.up.railway.app")
+        flow.redirect_uri = backend_url + "/callback"
         flow.fetch_token(authorization_response=request.url)
         credentials = flow.credentials
         session["credentials"] = json.loads(credentials.to_json())
