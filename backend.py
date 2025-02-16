@@ -5,15 +5,9 @@ import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import google.oauth2.credentials
 from flask_session import Session
-from flask import redirect
 
 # Ambil credential dari environment variable
-import sys
-try:
-    GOOGLE_CREDENTIALS = json.loads(os.environ["GOOGLE_CREDENTIALS"])
-except KeyError:
-    print("❌ ERROR: GOOGLE_CREDENTIALS is not set!", file=sys.stderr)
-    exit(1)
+GOOGLE_CREDENTIALS = json.loads(os.environ["GOOGLE_CREDENTIALS"])
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -24,9 +18,12 @@ SCOPES = ["https://www.googleapis.com/auth/youtube.force-ssl"]
 API_SERVICE_NAME = "youtube"
 API_VERSION = "v3"
 
+# Redirect backend ke frontend Streamlit Cloud
+FRONTEND_URL = "https://hapuskomenjudol.streamlit.app/"
+
 @app.route("/")
 def index():
-    return redirect("https://hapuskomenjudol.streamlit.app")
+    return redirect(FRONTEND_URL)
 
 @app.route("/login")
 def login():
@@ -113,7 +110,5 @@ def delete_comment():
     return jsonify({"message": "Comment deleted successfully"})
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))  # Railway default 8080
+    port = int(os.environ.get("PORT", 8080))  # Railway default port
     app.run(host="0.0.0.0", port=port, debug=True)
-
-
