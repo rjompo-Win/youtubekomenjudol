@@ -7,16 +7,15 @@ BACKEND_URL = "https://youtubekomenjudol-production.up.railway.app"
 
 st.title("🛡️ YouTube Comment Cleaner")
 
-# 1️⃣ Login ke YouTube
-st.subheader("1️⃣ Login ke YouTube")
+# Cek apakah user sudah login
+status_response = requests.get(f"{BACKEND_URL}/get_status").json()
+is_logged_in = status_response.get("logged_in", False)
 
-if "login_status" not in st.session_state:
-    st.session_state["login_status"] = False
-
-if not st.session_state["login_status"]:
+if not is_logged_in:
+    st.warning("⚠️ Anda belum login! Harap login terlebih dahulu sebelum menggunakan fitur ini.")
     if st.button("🔑 Login ke YouTube"):
         webbrowser.open(f"{BACKEND_URL}/login")
-        st.session_state["login_status"] = True
+    st.stop()  # Hentikan semua proses jika belum login
 
 # 2️⃣ Input untuk Video ID dan Kata Kunci
 st.subheader("2️⃣ Masukkan Link Video YouTube & Kata Kunci Filter")
@@ -63,6 +62,3 @@ if st.button("🔍 Ambil Komentar"):
                 st.warning("⚠️ Tidak ada komentar yang ditemukan.")
         else:
             st.error("❌ Gagal mengambil komentar. Pastikan Anda sudah login.")
-
-# Buka otomatis di browser
-webbrowser.open('http://localhost:8501')
