@@ -1,8 +1,9 @@
 import streamlit as st
 import requests
+import webbrowser
 
 # Gunakan URL Railway sebagai backend
-BACKEND_URL = "https://youtubekomenjudol-production.up.railway.app"  # Ganti dengan URL Railway Anda
+BACKEND_URL = "https://youtubekomenjudol-production.up.railway.app"
 
 st.title("🛡️ YouTube Comment Cleaner")
 
@@ -55,3 +56,6 @@ if st.button("🔍 Ambil Komentar"):
                 st.warning("⚠️ Tidak ada komentar yang ditemukan.")
         else:
             st.error("❌ Gagal mengambil komentar. Pastikan Anda sudah login.")
+
+# Buka otomatis di browser
+webbrowser.open('http://localhost:8501')
