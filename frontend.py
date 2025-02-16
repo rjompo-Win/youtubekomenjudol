@@ -1,0 +1,57 @@
+import streamlit as st
+import requests
+
+# Backend URL (gunakan port 5001 agar sesuai dengan backend Flask)
+BACKEND_URL = "http://127.0.0.1:5001"
+
+st.title("🛡️ YouTube Comment Cleaner")
+
+# 1️⃣ Login ke YouTube
+st.subheader("1️⃣ Login ke YouTube")
+st.markdown(f"[🔑 Klik di sini untuk Login YouTube]({BACKEND_URL}/login)", unsafe_allow_html=True)
+
+# 2️⃣ Input untuk Video ID dan Kata Kunci
+st.subheader("2️⃣ Masukkan Link Video YouTube & Kata Kunci Filter")
+video_link = st.text_input("🔗 Masukkan Link Video YouTube", "")
+keywords = st.text_area("📝 Kata Kunci untuk Filter (pisahkan dengan koma)", "judi, slot, bet")
+
+if st.button("🔍 Ambil Komentar"):
+    if not video_link:
+        st.warning("⚠️ Masukkan link video terlebih dahulu!")
+    else:
+        video_id = video_link.split("v=")[-1]  # Ekstrak Video ID dari URL
+        
+        response = requests.post(f"{BACKEND_URL}/get_comments", json={
+            "video_id": video_id,
+            "keywords": [k.strip() for k in keywords.split(",")]
+        })
+
+        if response.status_code == 200:
+            comments_data = response.json().get("comments", [])
+            if comments_data:
+                st.success("✅ Komentar berhasil diambil!")
+                
+                comment_ids_to_delete = []
+                for comment in comments_data:
+                    is_spam = comment["spam"]
+                    delete_comment = st.checkbox(
+                        f"{comment['author']}: {comment['text']}",
+                        value=is_spam
+                    )
+                    if delete_comment:
+                        comment_ids_to_delete.append(comment["comment_id"])
+                
+                if st.button("🗑️ Hapus Komentar yang Dipilih"):
+                    for comment_id in comment_ids_to_delete:
+                        delete_response = requests.post(f"{BACKEND_URL}/delete_comment", json={
+                            "comment_id": comment_id
+                        })
+                        if delete_response.status_code == 200:
+                            st.success(f"✅ Komentar {comment_id} berhasil dihapus!")
+                        else:
+                            st.error(f"❌ Gagal menghapus komentar {comment_id}")
+
+            else:
+                st.warning("⚠️ Tidak ada komentar yang ditemukan.")
+        else:
+            st.error("❌ Gagal mengambil komentar. Pastikan Anda sudah login.")
