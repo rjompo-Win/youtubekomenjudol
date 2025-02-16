@@ -31,7 +31,11 @@ def login():
         flow = google_auth_oauthlib.flow.Flow.from_client_config(
             GOOGLE_CREDENTIALS, scopes=SCOPES
         )
-        flow.redirect_uri = os.environ.get("BACKEND_URL") + "/callback"
+        
+        # Pastikan BACKEND_URL tidak None
+        backend_url = os.environ.get("BACKEND_URL", "https://youtubekomenjudol-production.up.railway.app")
+        flow.redirect_uri = backend_url + "/callback"
+        
         authorization_url, state = flow.authorization_url(
             access_type="offline", include_granted_scopes="true"
         )
@@ -40,6 +44,7 @@ def login():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route("/callback")
 def callback():
