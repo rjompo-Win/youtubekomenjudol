@@ -5,6 +5,7 @@ import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import google.oauth2.credentials
 from flask_session import Session
+from flask import redirect
 
 # Ambil credential dari environment variable
 import sys
@@ -25,7 +26,7 @@ API_VERSION = "v3"
 
 @app.route("/")
 def index():
-    return "YouTube Comment Cleaner API Running!"
+    return redirect("https://hapuskomenjudol.streamlit.app")
 
 @app.route("/login")
 def login():
@@ -114,4 +115,5 @@ def delete_comment():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))  # Railway default 8080
     app.run(host="0.0.0.0", port=port, debug=True)
+
 
