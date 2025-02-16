@@ -55,13 +55,16 @@ def callback():
         )
         flow.redirect_uri = backend_url + "/callback"
         flow.fetch_token(authorization_response=request.url)
-        
+
         credentials = flow.credentials
         session["credentials"] = json.loads(credentials.to_json())
-        return jsonify({"message": "Login successful! Now you can fetch comments."})
+
+        # 🚀 Redirect langsung ke frontend setelah login sukses!
+        return redirect("https://hapuskomenjudol.streamlit.app/")
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route("/get_comments", methods=["POST"])
 def get_comments():
