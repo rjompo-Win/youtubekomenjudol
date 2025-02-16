@@ -7,7 +7,12 @@ import google.oauth2.credentials
 from flask_session import Session
 
 # Ambil credential dari environment variable
-GOOGLE_CREDENTIALS = json.loads(os.environ["GOOGLE_CREDENTIALS"])
+import sys
+try:
+    GOOGLE_CREDENTIALS = json.loads(os.environ["GOOGLE_CREDENTIALS"])
+except KeyError:
+    print("❌ ERROR: GOOGLE_CREDENTIALS is not set!", file=sys.stderr)
+    exit(1)
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
